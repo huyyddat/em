@@ -3,206 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chúc mừng 8/3 Công Chúa</title>
+    <title>Gửi Bé Yêu 8/3</title>
     <style>
+        :root {
+            --rose-color: #e91e63;
+            --stem-color: #4caf50;
+            --glass-bg: rgba(255, 255, 255, 0.12);
+        }
+
         body {
             margin: 0;
             padding: 0;
+            background-color: #000;
             overflow: hidden;
-            background-color: #050005; /* Nền tối để hạt ánh sáng nổi bật */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
-        #canvas-container {
-            width: 100vw;
-            height: 100vh;
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Khung tin nhắn trôi xuống */
-        #message-box {
-            position: absolute;
-            top: -100%;
-            left: 50%;
-            transform: translateX(-50%);
+        /* SVG Rose Styling */
+        svg {
             width: 90%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 10;
-            transition: top 2s cubic-bezier(0.22, 1, 0.36, 1);
+            max-width: 450px;
+            height: auto;
+            z-index: 2;
+        }
+
+        path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+
+        /* 1. Thân xuất hiện (0-3s) */
+        .stem {
+            stroke: var(--stem-color);
+            animation: draw 3s linear forwards;
+        }
+
+        /* 2. Lá xuất hiện (3-5s) */
+        .leaf {
+            stroke: var(--stem-color);
+            animation: draw 2s linear 3s forwards;
+        }
+
+        /* 3. Hoa xuất hiện (5-10s) */
+        .petal {
+            stroke: var(--rose-color);
+            animation: draw 5s ease-in-out 5s forwards;
+        }
+        
+        .petal-fill {
+            fill: var(--rose-color);
+            opacity: 0;
+            animation: fillFade 3s ease-in 8s forwards;
+        }
+
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes fillFade {
+            to { opacity: 0.2; }
+        }
+
+        /* Hệ thống tin nhắn rơi dày đặc */
+        #message-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
         }
 
         .bubble {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: fadeIn 0.8s forwards;
-            align-self: flex-start;
+            position: absolute;
+            top: -100px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 8px 15px;
+            color: #fff;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(233, 30, 99, 0.2);
+            animation: fall linear forwards;
         }
 
-        .bubble:nth-child(even) {
-            align-self: flex-end;
-            background: rgba(255, 182, 193, 0.25);
-        }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        canvas {
-            display: block;
+        @keyframes fall {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(115vh); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div id="canvas-container">
-        <canvas id="roseCanvas"></canvas>
+    <div class="container">
+        <svg viewBox="0 0 100 120">
+            <path class="stem" d="M50,115 Q48,80 50,45" />
+            
+            <path class="leaf" d="M49,90 Q30,85 35,70 Q45,70 49,90" />
+            <path class="leaf" d="M51,75 Q70,70 65,55 Q55,55 51,75" />
+
+            <g>
+                <path class="petal" d="M50,45 Q35,40 30,25 Q50,5 70,25 Q65,40 50,45" />
+                <path class="petal" d="M50,45 Q70,40 80,25 Q70,10 50,15" />
+                <path class="petal" d="M50,45 Q30,40 20,25 Q30,10 50,15" />
+                <path class="petal" d="M50,30 Q45,20 50,10 Q55,20 50,30" />
+                <path class="petal-fill" d="M50,45 Q35,40 30,25 Q50,5 70,25 Q65,40 50,45 Z" />
+            </g>
+        </svg>
+
+        <div id="message-rain"></div>
     </div>
 
-    <div id="message-box">
-        </div>
-
     <script>
-        const canvas = document.getElementById('roseCanvas');
-        const ctx = canvas.getContext('2d');
-        const messageBox = document.getElementById('message-box');
-
-        let width, height;
-        const particles = [];
         const messages = [
             "Anh yêu em ❤️",
             "Yêu em bé của anh 🌹",
             "Nhớ em bé yêu của anh rất nhìu",
-            "8/3 hạnh phúc nhé!",
+            "8/3 hạnh phúc nhen",
             "Em bé của anh cười đẹp lắm 😊",
-            "Cười nhiều lên nhe em bé"
+            "Cười nhiều lên nhe em bé",
+            "Bên nhau quài quài nhe",
+            "Love you 3000"
         ];
 
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
+        const container = document.getElementById('message-rain');
+
+        function createMessage() {
+            const text = messages[Math.floor(Math.random() * messages.length)];
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerText = text;
+
+            // Vị trí ngang ngẫu nhiên (10% - 85%)
+            bubble.style.left = (Math.random() * 75 + 5) + '%';
+            
+            // Tốc độ rơi: từ 5s đến 8s (vừa phải để kịp đọc)
+            const duration = 5 + Math.random() * 3;
+            bubble.style.animationDuration = duration + 's';
+
+            container.appendChild(bubble);
+
+            // Xóa bubble sau khi rơi xong
+            setTimeout(() => { bubble.remove(); }, duration * 1000);
         }
 
-        window.addEventListener('resize', resize);
-        resize();
+        // Bắt đầu rơi tin nhắn sau khi hoa đã nở hoàn toàn (10 giây)
+        setTimeout(() => {
+            // "Dày đặc hơn" bằng cách tạo tin nhắn mỗi 0.8 giây
+            setInterval(createMessage, 800);
+        }, 10000);
 
-        class Particle {
-            constructor(x, y, color, targetX, targetY, delay) {
-                this.x = x;
-                this.y = height + 50;
-                this.targetX = targetX;
-                this.targetY = targetY;
-                this.color = color;
-                this.size = Math.random() * 2 + 1;
-                this.speed = 0.02;
-                this.alpha = 0;
-                this.delay = delay;
-                this.startTime = Date.now() + delay;
-            }
-
-            update() {
-                if (Date.now() < this.startTime) return;
-                
-                this.x += (this.targetX - this.x) * this.speed;
-                this.y += (this.targetY - this.y) * this.speed;
-                if (this.alpha < 1) this.alpha += 0.01;
-            }
-
-            draw() {
-                if (Date.now() < this.startTime) return;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color.replace('opacity', this.alpha);
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color.replace('opacity', '1');
-                ctx.fill();
-            }
-        }
-
-        // Tạo hình dáng hoa hồng
-        function createRose() {
-            const centerX = width / 2;
-            const centerY = height * 0.6;
-            const scale = Math.min(width, height) * 0.005;
-
-            // 1. Thân cây (Mọc trong 0-8s)
-            for (let i = 0; i < 100; i++) {
-                const tx = centerX + Math.sin(i * 0.1) * 5;
-                const ty = height - (i * (height * 0.5) / 100);
-                particles.push(new Particle(centerX, height, 'rgba(34, 139, 34, opacity)', tx, ty, i * 60));
-            }
-
-            // 2. Lá (Mọc trong 8-13s)
-            const leafPositions = [{x: -30, y: -100}, {x: 30, y: -150}];
-            leafPositions.forEach((pos, idx) => {
-                for (let i = 0; i < 50; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const r = Math.random() * 20 * scale;
-                    const tx = centerX + pos.x + Math.cos(angle) * r;
-                    const ty = height * 0.7 + pos.y + Math.sin(angle) * r;
-                    particles.push(new Particle(centerX, height, 'rgba(50, 205, 50, opacity)', tx, ty, 8000 + (idx * 1000) + (i * 40)));
-                }
-            });
-
-            // 3. Hoa nở (Mọc trong 13-20s)
-            for (let i = 0; i < 400; i++) {
-                const angle = i * 0.2;
-                const r = (scale * 5) * Math.sqrt(i);
-                const tx = centerX + Math.cos(angle) * r;
-                const ty = height * 0.35 + Math.sin(angle) * r;
-                
-                // Màu hồng dải gradient
-                const pink = `rgba(255, ${Math.floor(Math.random() * 100 + 50)}, ${Math.floor(Math.random() * 150 + 100)}, opacity)`;
-                particles.push(new Particle(centerX, height, pink, tx, ty, 13000 + (i * 15)));
-            }
-        }
-
-        function animate() {
-            ctx.fillStyle = 'rgba(5, 0, 5, 0.2)'; // Tạo hiệu ứng đuôi mờ
-            ctx.fillRect(0, 0, width, height);
-
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-
-            requestAnimationFrame(animate);
-        }
-
-        function showMessages() {
-            messageBox.style.top = "50px";
-            messages.forEach((text, i) => {
-                setTimeout(() => {
-                    const bubble = document.createElement('div');
-                    bubble.className = 'bubble';
-                    bubble.innerText = text;
-                    messageBox.appendChild(bubble);
-                }, i * 1500); // Mỗi tin nhắn cách nhau 1.5s
-            });
-        }
-
-        // Bắt đầu
-        createRose();
-        animate();
-
-        // Sau 20 giây thì hiện tin nhắn
-        setTimeout(showMessages, 20000);
-
+        // Tạo 3 tin nhắn ngay lập tức khi bắt đầu giai đoạn tin nhắn để "mồi" cảm giác dày đặc
+        setTimeout(() => {
+            for(let i=0; i<3; i++) createMessage();
+        }, 10001);
     </script>
 </body>
 </html>
